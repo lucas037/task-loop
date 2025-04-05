@@ -51,7 +51,7 @@ export default function Home() {
     .then((data) => {
       const lista = [];
 
-      for (let key in data) {
+      for (const key in data) {
         const activity = { ... data[key], uid: key };
         if (user != null && activity.uidUser === user.uid) {
           lista.push(activity);
@@ -147,9 +147,9 @@ export default function Home() {
   }
 
   function doneTodayActivity(index: number) {
-    let copyActivity = activities[index];
-    let today = new Date();
-    let todayString = `${today.getFullYear()}-${(today.getMonth() + 1)
+    const copyActivity = activities[index];
+    const today = new Date();
+    const todayString = `${today.getFullYear()}-${(today.getMonth() + 1)
       .toString()
       .padStart(2, "0")}-${today.getDate().toString().padStart(2, "0")}`;
   

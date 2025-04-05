@@ -10,7 +10,7 @@ export default function Login() {
   const [emailError, setEmailError] = useState("-");
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("-");
-  const [signInWithEmailAndPassword, user, loading, error] = useSignInWithEmailAndPassword(auth);
+  const [signInWithEmailAndPassword] = useSignInWithEmailAndPassword(auth);
 
   const validateEmail = () => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -40,7 +40,7 @@ export default function Login() {
 
     if (validEmail && validPassword) {
         signInWithEmailAndPassword(email, password)
-        .then((res) => {
+        .then(() => {
             window.location.href = "/";
         })
         .catch((error) => {
