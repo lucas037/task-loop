@@ -1,11 +1,19 @@
 "use client"
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "./services/firebaseConfig";
 import Image from "next/image";
 
 interface AtividadeType {
   uid: string;
+  name: string,
+  topic: string,
+  daysToNext: number,
+  lastActivity: string,
+  nextActivity: string,
+}
+
+interface NoUidActivityType {
   name: string,
   topic: string,
   daysToNext: number,
@@ -32,20 +40,7 @@ export default function Home() {
 
   const [activity, setActivity] = useState<AtividadeType>(initialActivity);
 
-  useEffect(() => {
-
-    if (!loading && !user) {
-      window.location.href = "/login";
-    }
-
-    if (user)
-      setUidUser(user['uid']);
-
-    getActivities();
-
-  }, [loading, user]);
-
-  function getActivities() {
+  const getActivities = useCallback(() => {
     fetch(`${process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL}/activities.json`)
     .then((res) => res.json())
     .then((data) => {
@@ -64,7 +59,20 @@ export default function Home() {
     .catch((error) => {
       console.error("Error fetching data:", error);
     });
-  }
+  }, [user])
+
+  useEffect(() => {
+
+    if (!loading && !user) {
+      window.location.href = "/login";
+    }
+
+    if (user)
+      setUidUser(user['uid']);
+
+    getActivities();
+
+  }, [loading, user, getActivities]);
 
   function handleAddEditActivity() {
     const lastDate = new Date(activity.lastActivity);
@@ -73,6 +81,7 @@ export default function Home() {
     const nextDateStr = lastDate.toISOString().split("T")[0];
 
     const { uid, ...activityWithoutUid } = activity;
+    void uid;
     const newActivity = {
       ...activityWithoutUid,
       nextActivity: nextDateStr,
@@ -86,7 +95,7 @@ export default function Home() {
     setActivity(initialActivity);
   }
 
-  function addActivity(newActivity: any) {
+  function addActivity(newActivity: NoUidActivityType) {
     fetch(`${process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL}/activities.json`, {
       method: 'POST',
       headers: {
@@ -110,7 +119,7 @@ export default function Home() {
     })
   }
 
-  function editActivity(editedActivity: any, uid: string) {
+  function editActivity(editedActivity: NoUidActivityType, uid: string) {
     fetch(`${process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL}/activities/${uid}.json`, {
       method: 'PUT',
       headers: {
