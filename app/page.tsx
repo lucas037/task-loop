@@ -12,6 +12,7 @@ interface AtividadeType {
   daysToNext: number,
   lastActivity: string,
   nextActivity: string,
+  position: number,
 }
 
 interface NoUidActivityType {
@@ -21,6 +22,7 @@ interface NoUidActivityType {
   daysToNext: number,
   lastActivity: string,
   nextActivity: string,
+  position: number,
 }
 
 export default function Home() {
@@ -39,6 +41,7 @@ export default function Home() {
     daysToNext: 0,
     lastActivity: "",
     nextActivity: "",
+    position: 0,
   };
 
   const [activity, setActivity] = useState<AtividadeType>(initialActivity);
@@ -56,6 +59,8 @@ export default function Home() {
 
         }
       }
+
+      lista.sort((a, b) => a.position - b.position);
 
       setActivities(lista);
     })
@@ -99,6 +104,16 @@ export default function Home() {
   }
 
   function addActivity(newActivity: NoUidActivityType) {
+    let value = 0;
+
+    for (let i = 0; i < activities.length; i++) {
+      if (activities[i].position > value)
+        value = activities[i].position;
+    }
+
+    value += 1;
+    newActivity.position = value;
+
     fetch(`${process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL}/activities.json`, {
       method: 'POST',
       headers: {
@@ -164,9 +179,15 @@ export default function Home() {
     const todayString = `${today.getFullYear()}-${(today.getMonth() + 1)
       .toString()
       .padStart(2, "0")}-${today.getDate().toString().padStart(2, "0")}`;
-  
-    copyActivity.lastActivity = todayString;
 
+    if (copyActivity.lastActivity < todayString)
+      copyActivity.lastActivity = todayString;
+    else {
+      const newLastDate = new Date(copyActivity.lastActivity);
+      newLastDate.setDate(newLastDate.getDate() + 1); 
+      
+      copyActivity.lastActivity = newLastDate.toISOString().split("T")[0];
+    }
 
     const lastDate = new Date(copyActivity.lastActivity);
     lastDate.setDate(lastDate.getDate() + copyActivity.daysToNext); 
@@ -177,7 +198,7 @@ export default function Home() {
       method: 'PATCH',
       body: JSON.stringify({
         nextActivity: nextDateStr,
-        lastActivity: todayString,
+        lastActivity: copyActivity.lastActivity,
       })
     })
     .then((res) => {
