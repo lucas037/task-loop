@@ -46,7 +46,6 @@ export default function Home() {
   const [editIndexes, setEditIndexes] = useState([-1, -1]);
   const [topic, setTopic] = useState("");
  
-  const [activities, setActivities] = useState<AtividadeType[]>([]);
   const [categories, setCategories] = useState<CategoryDataType[]>([]);
 
   const days = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sab']
@@ -80,7 +79,7 @@ export default function Home() {
 
       Object.keys(data).forEach((categoryName) => {
         
-        let newCategory: CategoryDataType = {
+        const newCategory: CategoryDataType = {
           name: categoryName,
           data: [],
           position: data[categoryName]['position'],
@@ -119,7 +118,7 @@ export default function Home() {
 
     getActivities();
 
-  }, [loading, user, getActivities]);
+  }, [loading, getActivities]);
 
   function handleAddEditActivity() {
     const lastDate = new Date(activity.lastActivity);
