@@ -87,6 +87,11 @@ export default function Home() {
           </span>
 
           <div onClick={() => {handleLogin()}} className="bg-black text-lg h-[35px] text-white flex justify-center items-center rounded-lg cursor-pointer">Sign Up</div>
+
+          <div className="flex justify-center gap-1 mt-2">
+            <span>Possui uma conta?</span>
+            <span className="font-bold cursor-pointer underline" onClick={() => {window.location.href = "/login";}}>Login</span>
+          </div>
         </div>
 
       </div>

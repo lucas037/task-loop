@@ -87,6 +87,11 @@ export default function Login() {
           </span>
 
           <div onClick={() => {handleLogin()}} className="bg-black text-lg h-[35px] text-white flex justify-center items-center rounded-lg cursor-pointer">Login</div>
+
+          <div className="flex justify-center gap-1 mt-2">
+            <span>Ainda não possui uma conta?</span>
+            <span className="font-bold cursor-pointer underline" onClick={() => {window.location.href = "/sign-up";}}>Criar</span>
+          </div>
         </div>
 
       </div>
