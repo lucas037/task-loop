@@ -210,6 +210,37 @@ export default function Home() {
       }
     })
   }
+
+  async function changePositionActivity(a: number, b: number) {
+    if (a < 0)
+      return;
+
+    if (b >= activities.length)
+      return;
+
+    const posA = activities[a].position;
+    const posB = activities[b].position;
+
+    await updatePosition(a, posB);
+    await updatePosition(b, posA);
+
+    getActivities();
+  }
+
+  function updatePosition(index: number, newPosition: number): Promise<void> {
+    return fetch(`${process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL}/activities/${activities[index].uid}.json`, {
+      method: 'PATCH',
+      body: JSON.stringify({ position: newPosition })
+    })
+      .then((res) => {
+        if (res.ok) {
+          console.log("Item atualizado com nova posição");
+        }
+        else {
+          alert("erro ao atualizar posição.");
+        }
+      });
+  }
   
 
   function getColor(dateStr: string) {
@@ -339,6 +370,18 @@ export default function Home() {
                   <Image src="/check-mark.png" alt="check" width={15} height={15} className="cursor-pointer"
                     onClick={() => {
                         doneTodayActivity(index);
+                      }}
+                  />
+
+                  <Image src="/up.png" alt="up" width={15} height={15} className="cursor-pointer"
+                    onClick={() => {
+                        changePositionActivity(index - 1, index);
+                      }}
+                  />
+
+                  <Image src="/down.png" alt="down" width={15} height={15} className="cursor-pointer"
+                    onClick={() => {
+                        changePositionActivity(index, index + 1);
                       }}
                   />
 
