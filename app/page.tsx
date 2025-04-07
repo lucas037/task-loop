@@ -8,6 +8,7 @@ interface AtividadeType {
   uid: string;
   name: string,
   topic: string,
+  description: string,
   daysToNext: number,
   lastActivity: string,
   nextActivity: string,
@@ -16,6 +17,7 @@ interface AtividadeType {
 interface NoUidActivityType {
   name: string,
   topic: string,
+  description: string,
   daysToNext: number,
   lastActivity: string,
   nextActivity: string,
@@ -33,6 +35,7 @@ export default function Home() {
     uid: "",
     name: "",
     topic: "",
+    description: "",
     daysToNext: 0,
     lastActivity: "",
     nextActivity: "",
@@ -223,6 +226,15 @@ export default function Home() {
         </div>
 
         <div className="flex flex-col items-center">
+          <span className="font-bold">Description</span>
+          <input
+            className="w-[250px] h-[25px] bg-white border-1 pl-1"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setActivity({ ...activity, description: e.target.value })}
+            value={activity.description}
+          />
+        </div>
+
+        <div className="flex flex-col items-center">
           <span className="font-bold">Interval (days)</span>
           <input
             className="w-[250px] h-[25px] bg-white border-1 pl-1"
@@ -260,6 +272,11 @@ export default function Home() {
                 <div className="flex flex-col">
                   <span className="text-gray-500 font-bold flex justify-center">Category</span>
                   <span className="flex justify-center">{atividade.topic}</span>
+                </div>
+
+                <div className="flex flex-col">
+                  <span className="text-gray-500 font-bold flex justify-center">Description</span>
+                  <span className="flex justify-center">{atividade.description}</span>
                 </div>
                 
                 <div className="flex flex-col">
