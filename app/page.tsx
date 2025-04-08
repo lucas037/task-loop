@@ -66,8 +66,8 @@ export default function Home() {
 
   const [activity, setActivity] = useState<AtividadeType>(initialActivity);
 
-  const getActivities = useCallback(() => {
-    fetch(`${process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL}/activities.json`)
+  const getActivities = useCallback((uidUser: string) => {
+    fetch(`${process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL}/activities/${uidUser}.json`)
     .then((res) => res.json())
     .then((data) => {
       let categoriesData: CategoryDataType[] = [];
@@ -78,13 +78,11 @@ export default function Home() {
       }
 
       Object.keys(data).forEach((categoryName) => {
-        
         const newCategory: CategoryDataType = {
           name: categoryName,
           data: [],
           position: data[categoryName]['position'],
         };
-
 
         Object.keys(data[categoryName]['activities-data']).forEach((activityId) => {
           const newActivity: AtividadeType = data[categoryName]['activities-data'][activityId];
@@ -113,10 +111,14 @@ export default function Home() {
       window.location.href = "/login";
     }
 
-    if (user)
-      setUidUser(user['uid']);
+    let uidUser = '';
+    if (user) {
+      uidUser = user['uid'];
+      setUidUser(uidUser);
+    }
 
-    getActivities();
+    if (uidUser != '')
+      getActivities(uidUser);
 
   }, [loading, getActivities]);
 
@@ -139,6 +141,7 @@ export default function Home() {
       editActivity(newActivity);
 
     setActivity(initialActivity);
+    getActivities(uidUser);
   }
 
   function getPositionCategory(category: string) {
@@ -190,11 +193,10 @@ export default function Home() {
       newActivity.streak = calcStreak(activity);
 
     const updates = {
-      [`/activities/${topic}/activities-data/${crypto.randomUUID()}`]: {
-        uidUser,
+      [`/activities/${uidUser}/${topic}/activities-data/${crypto.randomUUID()}`]: {
         ...newActivity,
       },
-      [`/activities/${topic}/position`]: getPositionCategory(topic)
+      [`/activities/${uidUser}/${topic}/position`]: getPositionCategory(topic)
     };
 
     fetch(`${process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL}/.json`, {
@@ -209,7 +211,7 @@ export default function Home() {
       if (res.ok) {
         console.log("Item added successfully");
 
-        getActivities();
+        getActivities(uidUser);
 
       } else {
         console.error("Error adding item");
@@ -231,13 +233,12 @@ export default function Home() {
     if (activity.type == 'days')
       editedActivity.streak = calcStreak(activity);
 
-    fetch(`${process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL}/activities/${category.name}/activities-data/${activity.uid}.json`, {
+    fetch(`${process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL}/activities/${uidUser}/${category.name}/activities-data/${activity.uid}.json`, {
       method: 'PUT',
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        uidUser: uidUser,
         ...editedActivity,
       })
     })
@@ -245,7 +246,7 @@ export default function Home() {
       if (res.ok) {
         console.log("Item edited successfully");
         setEditIndexes([-1, -1]);
-        getActivities();
+        getActivities(uidUser);
       } else {
         console.error("Error editing item");
       }
@@ -256,7 +257,7 @@ export default function Home() {
     const category = categories[indexTopic];
     const activity = category.data[index];
 
-    let removeUrl = `${process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL}/activities/${category.name}`;
+    let removeUrl = `${process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL}/activities/${uidUser}/${category.name}`;
 
     if (category.data.length >= 2) {
       removeUrl += `/activities-data/${activity.uid}`;
@@ -270,7 +271,7 @@ export default function Home() {
     .then((res) => {
       if (res.ok) {
         console.log("Item deleted successfully");
-        getActivities();
+        getActivities(uidUser);
       } else {
         console.log("Error deleting item");
       }
@@ -300,7 +301,7 @@ export default function Home() {
 
     const nextDateStr = lastDate.toISOString().split("T")[0];
     
-    fetch(`${process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL}/activities/${category.name}/activities-data/${activityCopy.uid}.json`, {
+    fetch(`${process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL}/activities/${uidUser}/${category.name}/activities-data/${activityCopy.uid}.json`, {
       method: 'PATCH',
       body: JSON.stringify({
         nextActivity: nextDateStr,
@@ -310,7 +311,7 @@ export default function Home() {
     .then((res) => {
       if (res.ok) {
         console.log("Item updated successfully");
-        getActivities();
+        getActivities(uidUser);
       } else {
         console.error("Error updating item");
       }
@@ -326,7 +327,7 @@ export default function Home() {
       .padStart(2, "0")}-${today.getDate().toString().padStart(2, "0")}`;
 
 
-    fetch(`${process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL}/activities/${category.name}/activities-data/${activityCopy.uid}.json`, {
+    fetch(`${process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL}/activities/${uidUser}/${category.name}/activities-data/${activityCopy.uid}.json`, {
       method: 'PATCH',
       body: JSON.stringify({
         lastRelapse: todayString,
@@ -338,7 +339,7 @@ export default function Home() {
     .then((res) => {
       if (res.ok) {
         console.log("Item updated successfully");
-        getActivities();
+        getActivities(uidUser);
       } else {
         console.error("Error updating item");
       }
@@ -359,14 +360,15 @@ export default function Home() {
     await updatePosition(a, posB, indexTopic);
     await updatePosition(b, posA, indexTopic);
 
-    getActivities();
+    getActivities(uidUser);
   }
 
   function updatePosition(index: number, newPosition: number, indexTopic: number): Promise<void> {
     const category = categories[indexTopic];
     const activity = category.data[index];
 
-    return fetch(`${process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL}/activities/${category.name}/activities-data/${activity.uid}.json`, {
+
+    return fetch(`${process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL}/${uidUser}/${category.name}/activities-data/${activity.uid}.json`, {
       method: 'PATCH',
       body: JSON.stringify({ position: newPosition })
     })
