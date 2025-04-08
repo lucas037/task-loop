@@ -59,7 +59,7 @@ export default function Home() {
     nextActivity: yesterday.toISOString().slice(0, 10),
     position: 0,
     lastRelapse: yesterday.toISOString().slice(0, 10),
-    daysStatus: Array(7).fill(true),
+    daysStatus: Array(7).fill(false),
     type: "",
     streak: 0,
   };
@@ -288,8 +288,7 @@ export default function Home() {
 
     if (activityCopy.lastActivity < todayString)
       activityCopy.lastActivity = todayString;
-    else if (activity.type != 'days') {
-      alert("ops");
+    else if (activityCopy.type != 'days') {
       const newLastDate = new Date(activityCopy.lastActivity);
       newLastDate.setDate(newLastDate.getDate() + 1); 
       
@@ -471,7 +470,8 @@ export default function Home() {
 
         }
       }
-      else {
+      
+      if (!sequenceDays[i] || i == sequenceDays.length - 1 ){
         if (init != -1) {
           const newSequence = addSequence(init, end);
 
@@ -527,6 +527,7 @@ export default function Home() {
             <span className="font-bold">Type</span>
             <select
               className="w-[250px] h-[25px] bg-white border-1 pl-1" name="type"
+              value={activity.type}
               onChange={(e) => setActivity( { ... activity, type: e.target.value } ) }>
                 <option value=""></option>
                 <option value="interval">Interval</option>
@@ -573,6 +574,9 @@ export default function Home() {
                         <span>{day}</span>
                         <select
                           className="w-[60px] h-[25px] bg-white border-1 pl-1"
+                          value={ 
+                            activity.daysStatus[index] ? 'true' : 'false'
+                          }
                           onChange={(e) => {
                             const newActivity = { ... activity };
                             newActivity.daysStatus[index] = e.target.value == "true";
@@ -660,7 +664,7 @@ export default function Home() {
                           { activity.type == "days" &&
                             <div className="flex flex-col">
                               <span className="text-gray-500 font-bold flex justify-center">Day of last relapse</span>
-                              <span className="flex justify-center">{activity.lastRelapse} (Streak of {activity.streak})</span>
+                              <span className="flex justify-center">{activity.lastRelapse} (Streak of {calcStreak(activity)})</span>
                             </div>
                           }
 
