@@ -581,7 +581,7 @@ export default function Home() {
                           onChange={(e) => {
                             const newActivity = { ... activity };
                             newActivity.daysStatus[index] = e.target.value == "true";
-                            setActivity(activity);
+                            setActivity(newActivity);
                           }}
                         >
                           <option value="true">Sim</option>
