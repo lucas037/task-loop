@@ -366,9 +366,8 @@ export default function Home() {
   function updatePosition(index: number, newPosition: number, indexTopic: number): Promise<void> {
     const category = categories[indexTopic];
     const activity = category.data[index];
-
-
-    return fetch(`${process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL}/${uidUser}/${category.name}/activities-data/${activity.uid}.json`, {
+    
+    return fetch(`${process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL}/activities/${uidUser}/${category.name}/activities-data/${activity.uid}.json`, {
       method: 'PATCH',
       body: JSON.stringify({ position: newPosition })
     })
