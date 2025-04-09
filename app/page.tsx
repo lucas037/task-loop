@@ -635,10 +635,12 @@ export default function Home() {
                             <span className="flex justify-center">{activity.description}</span>
                           </div>
                           
+                          { activity.type == "interval" &&
                           <div className="flex flex-col">
                             <span className="text-gray-500 font-bold flex justify-center">Interval (days)</span>
                             <span className="flex justify-center">{activity.daysToNext}</span>
                           </div>
+                          }
 
                           { activity.type == "interval" &&
                             <div className="flex flex-col">
