@@ -16,6 +16,7 @@ interface AtividadeType {
   daysStatus: boolean[],
   type: string,
   streak: number,
+  lastRelapseBackup?: string,
 }
 
 interface NoUidActivityType {
@@ -67,6 +68,18 @@ export default function Home() {
   const [activity, setActivity] = useState<AtividadeType>(initialActivity);
 
   const getActivities = useCallback((uidUser: string) => {
+    const todayData = new Date(new Date().setHours(0, 0, 0, 0));
+
+    const dayOfWeek = todayData.getDay();
+
+
+    let lastDays = Array.from({ length: 7 }, (_, i) => 
+      new Date(todayData.getTime() - i * 24 * 60 * 60 * 1000)
+    ).reverse();
+
+    while (lastDays[0].getDay() != 0)
+      lastDays.unshift(lastDays.pop()!);
+
     fetch(`${process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL}/activities/${uidUser}.json`)
     .then((res) => res.json())
     .then((data) => {
@@ -87,6 +100,33 @@ export default function Home() {
         Object.keys(data[categoryName]['activities-data']).forEach((activityId) => {
           const newActivity: AtividadeType = data[categoryName]['activities-data'][activityId];
           newActivity.uid = activityId;
+
+
+          if (newActivity.type == 'days') {
+            for (let i = 0; i < lastDays.length; i++) {
+              if (newActivity.daysStatus[i]) {
+                const lastActivityDate = convertStringDate(newActivity.lastActivity);
+
+                if (normalizeDate(lastActivityDate) < normalizeDate(lastDays[i])) {
+                  let dayStr = lastDays[i].getDate().toString();
+                  if (dayStr.length == 1)
+                    dayStr = '0'+dayStr;
+
+                  let monthStr = (lastDays[i].getMonth() + 1).toString();
+                  if (monthStr.length == 1)
+                    monthStr = '0'+monthStr;
+3333333333333
+                  newActivity.lastRelapseBackup = newActivity.lastRelapse.slice();
+
+                  newActivity.lastRelapse = `${lastDays[i].getFullYear()}-${monthStr}-${dayStr}`;
+                }
+
+                console.log('-')
+              }
+            }
+            console.log('----');
+          }
+          
           newCategory.data = [ ... newCategory.data, newActivity ];
         })
 
@@ -95,7 +135,7 @@ export default function Home() {
 
       })
       
-      categoriesData.sort((a, b) => a.position - b.position)
+      categoriesData.sort((a, b) => a.position - b.position);
 
       setCategories(categoriesData);
 
@@ -142,6 +182,15 @@ export default function Home() {
 
     setActivity(initialActivity);
     getActivities(uidUser);
+  }
+
+  function normalizeDate(date: Date) {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  } 
+
+  function convertStringDate(strDate: string) {
+    const [year, month, day] = strDate.split('-').map(Number);
+    return new Date(year, month - 1, day);
   }
 
   function getPositionCategory(category: string) {
@@ -627,25 +676,25 @@ export default function Home() {
                         <div key={index} className={`w-[250px] shadow-lg border-gray-300 text-sm flex flex-col justify-between gap-1 p-1 rounded-sm ${getColor(activity)}`}>
                           <div className="flex flex-col">
                             <span className="text-gray-500 font-bold flex justify-center">Activity Name</span>
-                            <span className="flex justify-center">{activity.name}</span>
+                            <span className="text-center">{activity.name}</span>
                           </div>
 
                           <div className="flex flex-col">
                             <span className="text-gray-500 font-bold flex justify-center">Description</span>
-                            <span className="flex justify-center">{activity.description}</span>
+                            <span className="text-center">{activity.description}</span>
                           </div>
                           
                           { activity.type == "interval" &&
                           <div className="flex flex-col">
                             <span className="text-gray-500 font-bold flex justify-center">Interval (days)</span>
-                            <span className="flex justify-center">{activity.daysToNext}</span>
+                            <span className="text-center">{activity.daysToNext}</span>
                           </div>
                           }
 
                           { activity.type == "interval" &&
                             <div className="flex flex-col">
                               <span className="text-gray-500 font-bold flex justify-center">Last Done</span>
-                              <span className="flex justify-center">{activity.lastActivity}</span>
+                              <span className="text-center">{activity.lastActivity}</span>
                             </div>
 
                           }
@@ -653,31 +702,30 @@ export default function Home() {
                           { activity.type == "interval" &&
                             <div className="flex flex-col">
                               <span className="text-gray-500 font-bold flex justify-center">Next Due</span>
-                              <span className="flex justify-center">{activity.nextActivity}</span>
+                              <span className="text-center">{activity.nextActivity}</span>
                             </div>
                           }
 
                           { activity.type == "days" &&
                             <div className="flex flex-col">
                               <span className="text-gray-500 font-bold flex justify-center">Days</span>
-                              <span className="flex justify-center">{getSequenceDays(activity.daysStatus)}</span>
+                              <span className="text-center">{getSequenceDays(activity.daysStatus)}</span>
                             </div>
                           }
 
                           { activity.type == "days" &&
                             <div className="flex flex-col">
                               <span className="text-gray-500 font-bold flex justify-center">Day of last relapse</span>
-                              <span className="flex justify-center">{activity.lastRelapse} (Streak of {calcStreak(activity)})</span>
+                              <span className="text-center">{activity.lastRelapse} (Streak of {calcStreak(activity)})</span>
                             </div>
                           }
 
                           { activity.type == "days" &&
                             <div className="flex flex-col">
                               <span className="text-gray-500 font-bold flex justify-center">Last Activity</span>
-                              <span className="flex justify-center">{activity.lastActivity}</span>
+                              <span className="text-center">{activity.lastActivity}</span>
                             </div>
                           }
-                          
 
                           <div className="mt-2 flex justify-center gap-3">
                             <Image src="/edit.png" alt="edit" width={15} height={15} className={`cursor-pointer ${editIndexes[0] == indexTopic && editIndexes[1] == index ? 'bg-yellow-400' : null}`}
@@ -707,10 +755,10 @@ export default function Home() {
                                 }}
                             />
 
-                            { activity.type == 'days' &&
+                            { activity.type == 'days' && activity.lastRelapseBackup != null &&
                               <Image src="/cancel.png" alt="check" width={15} height={15} className="cursor-pointer"
                                 onClick={() => {
-                                  notDoneTodayActivity(index, indexTopic);
+                                    notDoneTodayActivity(index, indexTopic);
                                   }}
                               />
                             }
