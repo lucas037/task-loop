@@ -627,23 +627,25 @@ export default function Home() {
                         <div key={index} className={`w-[250px] shadow-lg border-gray-300 text-sm flex flex-col justify-between gap-1 p-1 rounded-sm ${getColor(activity)}`}>
                           <div className="flex flex-col">
                             <span className="text-gray-500 font-bold flex justify-center">Activity Name</span>
-                            <span className="flex justify-center">{activity.name}</span>
+                            <span className="text-center">{activity.name}</span>
                           </div>
 
                           <div className="flex flex-col">
                             <span className="text-gray-500 font-bold flex justify-center">Description</span>
-                            <span className="flex justify-center">{activity.description}</span>
+                            <span className="text-center">{activity.description}</span>
                           </div>
                           
+                          { activity.type == "interval" &&
                           <div className="flex flex-col">
                             <span className="text-gray-500 font-bold flex justify-center">Interval (days)</span>
-                            <span className="flex justify-center">{activity.daysToNext}</span>
+                            <span className="text-center">{activity.daysToNext}</span>
                           </div>
+                          }
 
                           { activity.type == "interval" &&
                             <div className="flex flex-col">
                               <span className="text-gray-500 font-bold flex justify-center">Last Done</span>
-                              <span className="flex justify-center">{activity.lastActivity}</span>
+                              <span className="text-center">{activity.lastActivity}</span>
                             </div>
 
                           }
@@ -651,28 +653,28 @@ export default function Home() {
                           { activity.type == "interval" &&
                             <div className="flex flex-col">
                               <span className="text-gray-500 font-bold flex justify-center">Next Due</span>
-                              <span className="flex justify-center">{activity.nextActivity}</span>
+                              <span className="text-center">{activity.nextActivity}</span>
                             </div>
                           }
 
                           { activity.type == "days" &&
                             <div className="flex flex-col">
                               <span className="text-gray-500 font-bold flex justify-center">Days</span>
-                              <span className="flex justify-center">{getSequenceDays(activity.daysStatus)}</span>
+                              <span className="text-center">{getSequenceDays(activity.daysStatus)}</span>
                             </div>
                           }
 
                           { activity.type == "days" &&
                             <div className="flex flex-col">
                               <span className="text-gray-500 font-bold flex justify-center">Day of last relapse</span>
-                              <span className="flex justify-center">{activity.lastRelapse} (Streak of {calcStreak(activity)})</span>
+                              <span className="text-center">{activity.lastRelapse} (Streak of {calcStreak(activity)})</span>
                             </div>
                           }
 
                           { activity.type == "days" &&
                             <div className="flex flex-col">
                               <span className="text-gray-500 font-bold flex justify-center">Last Activity</span>
-                              <span className="flex justify-center">{activity.lastActivity}</span>
+                              <span className="text-center">{activity.lastActivity}</span>
                             </div>
                           }
                           
